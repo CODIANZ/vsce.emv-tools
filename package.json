@@ -26,6 +26,15 @@
       ]
     }
   },
+  "publisher": "CODIANZ",
+  "author": "Terukazu Inoue",
+  "license": "MIT",
+  "homepage": "https://github.com/CODIANZ/vsce.emv-tools",
+  "typings": "./dist/src/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CODIANZ/vsce.emv-tools.git"
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
