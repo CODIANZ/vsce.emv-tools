@@ -48,6 +48,6 @@
     "typescript": "^5.1.3"
   },
   "dependencies": {
-    "@codianz/emv-tools": "^0.0.1"
+    "@codianz/emv-tools": "^0.0.3"
   }
 }
