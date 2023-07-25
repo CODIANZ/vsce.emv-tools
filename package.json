@@ -16,15 +16,37 @@
       {
         "command": "emv-tools.analyze_rapdu",
         "title": "Analyze R-APDU"
+      },
+      {
+        "command": "emv-tools.analyze_tlv",
+        "title": "Analyze TLV"
       }
     ],
     "menus": {
       "editor/context": [
         {
+          "submenu": "emv-tools-menu",
+          "group": "emv-tools-menu",
+          "when": "editorHasSelection"
+        }
+      ],
+      "emv-tools-menu":[
+        {
+          "id": "emv-tools-menu.analyze_rapdu",
           "command": "emv-tools.analyze_rapdu"
+        },
+        {
+          "id": "emv-tools-menu.analyze_tlv",
+          "command": "emv-tools.analyze_tlv"
         }
       ]
-    }
+    },
+    "submenus": [
+      {
+        "id": "emv-tools-menu",
+        "label": "EMV Tools"
+      }
+    ]
   },
   "publisher": "CODIANZ",
   "author": "Terukazu Inoue",
@@ -64,6 +86,6 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@codianz/emv-tools": "^0.0.4"
+    "@codianz/emv-tools": "^0.0.5"
   }
 }
