@@ -2,16 +2,36 @@
 
 import * as vscode from 'vscode';
 import * as emv from "@codianz/emv-tools";
+import * as fs from "fs";
 
 class RapduDCP implements vscode.TextDocumentContentProvider {
 	onDidChange?: vscode.Event<vscode.Uri> | undefined;
 	provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
 		const rapdu = emv.rapdu.create_from_data_chunk(emv.data_chunk.create_from_hex_string(uri.query));
-		return rapdu.get_tlv().to_string();
+		return `status word: ${rapdu.status_word.to_hex_string()}\n${rapdu.get_tlv().to_string()}`;
 	}
 }
 
-export function activate(context: vscode.ExtensionContext) {
+async function setupEmvTags() {
+	emv.EmvTags.Instance.restoreDefault();
+	vscode.workspace.workspaceFolders?.forEach(async dir => {
+		const furi = vscode.Uri.joinPath(dir.uri, ".emv-tags.json");
+		try {
+			const fpath = furi.fsPath;
+			await fs.promises.access(fpath, fs.constants.F_OK);
+			const jstr = await fs.promises.readFile(fpath, { encoding: "utf-8" });
+			const jobj = JSON.parse(jstr);
+			emv.EmvTags.Instance.addPrivateTags(jobj);
+			console.log(`load private tags from ${fpath}`);
+		} catch (err) {
+			return;
+		}
+	});
+}
+
+export async function activate(context: vscode.ExtensionContext) {
+	await setupEmvTags();
+
 	const SCHEME = "emv-tools";
 	let counter = 1;
 
