@@ -6,17 +6,49 @@ import * as fs from "fs";
 
 class RapduDCP implements vscode.TextDocumentContentProvider {
 	onDidChange?: vscode.Event<vscode.Uri> | undefined;
-	provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
-		const rapdu = emv.rapdu.create_from_data_chunk(emv.data_chunk.create_from_hex_string(uri.query));
-		return `status word: ${rapdu.status_word.to_hex_string()}\n${rapdu.get_tlv().to_string()}`;
+	async provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): Promise<string | undefined> {
+		let str = "";
+		try{
+			const rapdu = emv.rapdu.create_from_data_chunk(emv.data_chunk.create_from_hex_string(uri.query));
+			str += `status word: ${rapdu.status_word.to_hex_string()}\n${rapdu.get_tlv().to_string()}`;
+		}
+		catch(err: unknown){
+			if(err instanceof Error){
+				await vscode.window.showErrorMessage(err.toString());
+			}
+			else{
+				await vscode.window.showErrorMessage(`unknown error: ${err}`);
+			}
+		}
+		return str.length > 0 ? str : undefined;
 	}
 }
 
 class TlvuDCP implements vscode.TextDocumentContentProvider {
 	onDidChange?: vscode.Event<vscode.Uri> | undefined;
-	provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): vscode.ProviderResult<string> {
-		const tlv = emv.tlv.create_from_data_chunk(emv.data_chunk.create_from_hex_string(uri.query));
-		return tlv.to_string();
+	async provideTextDocumentContent(uri: vscode.Uri, token: vscode.CancellationToken): Promise<string | undefined> {
+		let str = "";
+		try{
+			let dchunk = emv.data_chunk.create_from_hex_string(uri.query);
+			while(true){
+				const tlv = emv.tlv.create_from_data_chunk(dchunk);
+				if(!tlv.valid) {
+					str += `wrong bytes: ${dchunk.to_hex_string()}\n`;
+					break;
+				}
+				str += `${tlv.to_string()}\n`;
+				dchunk = dchunk.get_range(tlv.size);
+			}
+		}
+		catch(err: unknown){
+			if(err instanceof Error){
+				await vscode.window.showErrorMessage(err.toString());
+			}
+			else{
+				await vscode.window.showErrorMessage(`unknown error: ${err}`);
+			}
+		}
+		return str.length > 0 ? str : undefined;
 	}
 }
 
